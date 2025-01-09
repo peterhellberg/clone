@@ -34,6 +34,16 @@ func TestExtractRepo(t *testing.T) {
 				"aisnake",
 				"Gists/aisnake",
 			},
+			{
+				"https://gist.github.com/8ab356001fea59cdc26d01d130bff17b.git",
+				"",
+				"Gists/8ab356001fea59cdc26d01d130bff17b",
+			},
+			{
+				"https://github.com/c7/recept.c7.se.git",
+				"",
+				"c7/recept.c7.se",
+			},
 		} {
 			t.Run(tt.uri, func(t *testing.T) {
 				repo, err := extractRepo(tt.uri, tt.gist)

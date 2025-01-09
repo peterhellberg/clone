@@ -63,6 +63,9 @@ func extractRepo(link, name string) (string, error) {
 
 	repo := link
 
+	repo = strings.Replace(repo, "https://github.com/", ghPrefix, 1)
+	repo = strings.Replace(repo, "https://gist.github.com/", gistPrefix, 1)
+
 	gist := strings.HasPrefix(repo, gistPrefix)
 
 	if !strings.HasPrefix(repo, ghPrefix) && !gist {
