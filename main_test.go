@@ -44,6 +44,21 @@ func TestExtractRepo(t *testing.T) {
 				"",
 				"c7/recept.c7.se",
 			},
+			{
+				"https://codeberg.org/ziglang/zig.git",
+				"",
+				"ziglang/zig",
+			},
+			{
+				"ssh://git@codeberg.org/ziglang/zig.git",
+				"",
+				"ziglang/zig",
+			},
+			{
+				"git@codeberg.org:ziglang/zig.git",
+				"",
+				"ziglang/zig",
+			},
 		} {
 			t.Run(tt.uri, func(t *testing.T) {
 				repo, err := extractRepo(tt.uri, tt.gist)

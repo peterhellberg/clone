@@ -4,13 +4,15 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 )
 
-const repos = "Code/GitHub"
+const repos = "Code/"
 
 type input struct {
 	base string
@@ -38,8 +40,8 @@ func parseInput(args []string) (input, error) {
 	flags.StringVar(&in.name, "name", "",
 		"The name to use for the project, if blank use GitHub name")
 
-	if err := flags.Parse(args[1:]); err != nil {
-		return in, err
+	if parseErr := flags.Parse(args[1:]); parseErr != nil {
+		return in, parseErr
 	}
 
 	in.link = flags.Arg(0)
@@ -49,31 +51,38 @@ func parseInput(args []string) (input, error) {
 		return in, err
 	}
 
-	in.path = filepath.Join(in.base, in.repo)
+	in.path = joinPath(in)
 
 	return in, nil
 }
 
 func extractRepo(link, name string) (string, error) {
-	const (
-		gistPrefix = "git@gist.github.com:"
-		ghPrefix   = "git@github.com:"
-		suffix     = ".git"
-	)
+	var prefixReplacements = map[string]string{
+		"ssh://git@codeberg.org/":  "git@codeberg.org:",
+		"https://codeberg.org/":    "git@codeberg.org:",
+		"https://github.com/":      "git@github.com:",
+		"https://gist.github.com/": "git@gist.github.com:",
+	}
+
+	var knownPrefixes = slices.Collect(maps.Values(prefixReplacements))
 
 	repo := link
 
-	repo = strings.Replace(repo, "https://github.com/", ghPrefix, 1)
-	repo = strings.Replace(repo, "https://gist.github.com/", gistPrefix, 1)
-
-	gist := strings.HasPrefix(repo, gistPrefix)
-
-	if !strings.HasPrefix(repo, ghPrefix) && !gist {
-		return "", fmt.Errorf("Missing %q prefix", ghPrefix)
+	for old, prefix := range prefixReplacements {
+		repo = strings.Replace(repo, old, prefix, 1)
 	}
 
-	repo = strings.TrimPrefix(repo, gistPrefix)
-	repo = strings.TrimPrefix(repo, ghPrefix)
+	if !hasPrefix(repo, knownPrefixes) {
+		return "", fmt.Errorf("Missing known prefix")
+	}
+
+	gist := strings.Contains(repo, "gist.github.com")
+
+	for _, prefix := range knownPrefixes {
+		repo = strings.TrimPrefix(repo, prefix)
+	}
+
+	const suffix = ".git"
 
 	if !strings.HasSuffix(link, suffix) {
 		return "", fmt.Errorf("Missing %q suffix", suffix)
@@ -120,4 +129,31 @@ func run(args []string, stderr io.Writer) error {
 	cmd.Stderr = stderr
 
 	return cmd.Run()
+}
+
+func joinPath(in input) string {
+	return filepath.Join(in.base, serviceName(in.link), in.repo)
+}
+
+func serviceName(link string) string {
+	s := strings.ToLower(link)
+
+	switch {
+	case strings.Contains(s, "github.com"):
+		return "GitHub"
+	case strings.Contains(s, "codeberg.org"):
+		return "Codeberg"
+	default:
+		return ""
+	}
+}
+
+func hasPrefix(s string, prefixes []string) bool {
+	for _, p := range prefixes {
+		if strings.HasPrefix(s, p) {
+			return true
+		}
+	}
+
+	return false
 }
