@@ -1,7 +1,7 @@
 # clone 💾
 
 > [!Note]
-> This is just a tiny convenience tool for when I'm cloning Gists and GitHub repos.
+> This is just a tiny convenience tool for when I'm cloning Gists and GitHub/Codeberg repos.
 
 ## Installation
 
@@ -16,9 +16,9 @@ clone -h
 
 Usage of clone:
   -base string
-    	The base directory to clone into (default "/home/peter/Code/GitHub")
+    	The base directory to clone into (default "/home/peter/Code")
   -name string
-    	The name to use for the project, if blank use GitHub name
+    	The name to use for the project, if blank use repo name
 ```
 
 > [!Tip]
@@ -28,7 +28,7 @@ Usage of clone:
 
 ```console
 clone -base=/tmp/repos -name=trooper git@github.com:peterhellberg/clone.git
-Cloning into '/tmp/repos/peterhellberg/trooper'...
+Cloning into '/tmp/repos/GitHub/peterhellberg/trooper'...
 remote: Enumerating objects: 15, done.
 remote: Counting objects: 100% (15/15), done.
 remote: Compressing objects: 100% (11/11), done.

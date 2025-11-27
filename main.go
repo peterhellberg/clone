@@ -38,7 +38,7 @@ func parseInput(args []string) (input, error) {
 		"The base directory to clone into")
 
 	flags.StringVar(&in.name, "name", "",
-		"The name to use for the project, if blank use GitHub name")
+		"The name to use for the project, if blank use repo name")
 
 	if parseErr := flags.Parse(args[1:]); parseErr != nil {
 		return in, parseErr
